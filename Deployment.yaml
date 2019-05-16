@@ -1,0 +1,27 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: mac-app
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: mac-app
+      spec:
+        containers:
+        - name: mac-app
+          image: mnabeel/mac-app:latest
+          ports:
+          - containerPort: 8080
+          env:
+          - name: "ASPNETCORE_ENVIRONMENT"
+            value: "Kubernetes"
+          volumentMounts:
+          - name: secrets
+            mountPath: /app/secrets
+        volumes:
+        - name: secrets
+          secret:
+            secretName: secret-appsettings

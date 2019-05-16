@@ -1,0 +1,67 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+<div class="text-center">
+    <h1 class="display-4">Welcome to members system</h1>
+</div>
+<div class="member-container">
+    <label title="Members">Members</label>
+    <div class="members-container"></div>
+</div>
+<div>
+    <label title="Add Member">Add Member</label>
+    <div>
+        <input type="text" placeholder="Enter member name" id="newMemberName" class="new-member"/>
+        <button type="Post" onclick="addNewMember();">Add new member</button>
+    </div>
+</div>
+
+<script>
+var mac_api_bas_uri_connection_string = "@Configuration["mac-api-base-uri:ConnectionString"]"; 
+var members = [];
+$(document).ready(function() {
+    getMembers();
+});
+var addNewMember = function() {
+    var member = $("#newMemberName");
+    var nextId = members[members.length - 1]  + 1;
+    var newMemberValue = { "id": nextId, "name": member.val()};
+    $.ajax({
+       url: mac_api_bas_uri_connection_string + "/api/members",
+       method: "POST",
+       dataType: "json",
+       contentType: "application/json; charset=utf-8",
+       data: JSON.stringify(newMemberValue),
+    }).done(function(html) {
+        console.log(html);
+        getMembers();
+    });
+}
+
+var getMembers = function() {
+    var mc = $(".members-container");
+    $.ajax({
+        url: mac_api_bas_uri_connection_string + "/api/members",
+        type: "GET",
+    })
+    .done(function(data) {
+        var elements = "";
+        $.each(data, function(item) {
+            var newMemberElement = '<div class="member-item" id=' + data[item].id + '>' + data[item].name + '</div>';
+            elements = elements + newMemberElement;
+            members.push(data[item].id);
+        });
+        mc.append(elements);
+    })
+    .fail(function (jqxhr, textStatus, error){
+        console.log(jqxhr);
+        console.log(textStatus);
+        console.log(error);
+        alert('failed');
+    });    
+}
+</script>
